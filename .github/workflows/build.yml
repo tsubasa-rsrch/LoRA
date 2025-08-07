@@ -1,17 +1,11 @@
-name: Build Desktop App (Tauri)
+name: Build Desktop App (Tauri) — Windows only
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, master ]
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,16 +26,17 @@ jobs:
           npm ci || npm install
           npm run build
 
-      # ★ 余計な引数は渡さない。これだけでOK
-      - name: Tauri Build
-        uses: tauri-apps/tauri-action@v0
+      - name: Install tauri-cli
+        run: cargo install tauri-cli || true
+
+      - name: Build (Tauri, verbose)
+        working-directory: src-tauri
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ""
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+          RUST_BACKTRACE: 1
+        run: cargo tauri build --verbose
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: lora-gui-${{ matrix.os }}
+          name: lora-gui-windows
           path: src-tauri/target/release/bundle/**
