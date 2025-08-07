@@ -1,0 +1,60 @@
+name: Build Desktop App (Tauri)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      # （なくてもOKだが速くなる）
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      # Tauriは tauri.conf.json の beforeBuildCommand でフロントをビルドする設定済み。
+      # 念のためフロントの依存だけ先入れしておく（あっても害なし）
+      - name: Install frontend deps
+        working-directory: frontend
+        run: |
+          npm ci || npm install
+
+      - name: Tauri Build
+        uses: tauri-apps/tauri-action@v0
+        with:
+          args: build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ""
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ""
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lora-gui-${{ matrix.os }}
+          path: |
+            src-tauri/target/release/bundle/**
