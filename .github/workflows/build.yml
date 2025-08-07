@@ -29,6 +29,10 @@ jobs:
       - name: Install tauri-cli
         run: cargo install tauri-cli || true
 
+- name: Install WiX Toolset (for MSI)
+  if: runner.os == 'Windows'
+  run: choco install wixtoolset --no-progress -y
+
       - name: Build (Tauri, verbose)
         working-directory: src-tauri
         env:
