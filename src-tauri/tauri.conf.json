@@ -1,0 +1,30 @@
+{
+  "build": {
+    "beforeBuildCommand": "cd ../frontend && npm install && npm run build",
+    "beforeDevCommand": "cd ../frontend && npm install && npm run dev",
+    "devPath": "http://localhost:5173",
+    "distDir": "../frontend/dist"
+  },
+  "package": {
+    "productName": "LoRA GUI",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "windows": [
+      {
+        "title": "LoRA GUI",
+        "fullscreen": false,
+        "resizable": true,
+        "width": 1200,
+        "height": 800
+      }
+    ],
+    "bundle": {
+      "active": true,
+      "identifier": "app.lora.gui",
+      "resources": [
+        "../resources/backend/**"
+      ]
+    }
+  }
+}

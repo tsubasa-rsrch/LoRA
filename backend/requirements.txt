@@ -1,0 +1,12 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+pydantic==2.7.1
+python-multipart==0.0.9
+orjson==3.10.3
+# 学習関連（必要に応じて）
+transformers>=4.42.0
+datasets>=2.19.0
+accelerate>=0.30.0
+bitsandbytes; platform_system != "Darwin"  # macOSは未対応（代替で GPTQ/AWQ/gguf 推奨）
+peft>=0.11.0
+sentencepiece>=0.2.0
