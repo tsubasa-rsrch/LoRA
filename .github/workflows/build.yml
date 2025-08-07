@@ -26,27 +26,15 @@ jobs:
         with:
           toolchain: stable
 
-      # （なくてもOKだが速くなる）
-      - name: Cache Cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      # Tauriは tauri.conf.json の beforeBuildCommand でフロントをビルドする設定済み。
-      # 念のためフロントの依存だけ先入れしておく（あっても害なし）
       - name: Install frontend deps
         working-directory: frontend
         run: |
           npm ci || npm install
+          npm run build
 
+      # ★ 余計な引数は渡さない。これだけでOK
       - name: Tauri Build
         uses: tauri-apps/tauri-action@v0
-        with:
-          args: build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ""
@@ -56,5 +44,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lora-gui-${{ matrix.os }}
-          path: |
-            src-tauri/target/release/bundle/**
+          path: src-tauri/target/release/bundle/**
