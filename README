@@ -1,0 +1,45 @@
+
+# LoRA GUI (LLM微調整MVP)
+
+**目的**: ターミナル不要で *QLoRA/LoRA* による LLM 微調整を「ウィザード式GUI」で実行。  
+このMVPは **学習データ作成/取り込み → キャプション自動生成 → 学習 → 評価 → エクスポート** を一通り揃えています。
+
+## 動かし方（ローカル開発）
+
+### 1) Backend (FastAPI)
+```bash
+cd backend
+python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn api:app --reload --port 8000
+```
+
+### 2) Frontend (Vite + React)
+```bash
+cd frontend
+npm install
+npm run dev  # http://localhost:5173
+```
+
+フロントは http://localhost:5173、バックは http://localhost:8000 を想定。
+
+## 主要機能
+- **環境チェック**: GPU/VRAM/ドライバの簡易検出、bitsandbytes可否
+- **データ**: 一問一答エディタ、CSV/JSONL/ShareGPT/MD/TXT 取り込み
+- **自動キャプション**: 文書から *instruction/input/output* 形式のペア生成（軽量ヒューリスティック + 任意でローカルLLM）
+- **学習**: QLoRA/LoRA（PEFT+transformers）。VRAMに応じて安全なデフォルトを提案
+- **評価**: 簡易ベンチ（Before/After比較UI、MVPはAfter中心）
+- **エクスポート**: LoRAアダプタ保存、モデルカード生成
+
+## 注意
+- 本MVPは最小実装です。大規模モデルの学習はGPU/VRAM次第でかなり時間がかかります。
+- QLoRAには`bitsandbytes`が必要。Apple SiliconはMPSで動くが速度は遅いです。
+- 「自動キャプション」のLLM補助は、ローカルモデルを別途DLして `CAPTION_MODEL_PATH` で指定すると有効化されます（未指定ならヒューリスティックのみ）。
+
+## 推奨ベースモデル（例）
+- Llama 3 8B / Qwen2 7B / Mistral 7B など
+- Hugging Face から事前にダウンロード推奨（初回起動で自動DLされますが時間がかかります）
+
+---
+
+© 2025 LoRA GUI MVP
